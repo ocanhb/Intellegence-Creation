@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Integrasi - CollaborAML</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 180px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar-header, .user-info-bar, .nav, .logout { padding: 15px; }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar-header img.logo {
+      width: 26px;
+      margin-right: 8px;
+    }
+    .sidebar-header span {
+      font-weight: bold;
+      color: #007bff;
+      font-size: 14px;
+    }
+    .user-info-bar {
+      display: flex;
+      align-items: center;
+    }
+    .user-info-bar img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .user-info-bar .name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .nav a {
+      display: block;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #007bff;
+      border: 1px solid #007bff;
+    }
+    .nav a.active, .nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .logout { text-align: center; padding: 10px; }
+    .logout button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 80%;
+    }
+    .logout button:hover { background-color: #c82333; }
+    .main {
+      flex: 1;
+      padding: 20px;
+      background-color: #f5f5f5;
+      overflow-x: auto;
+    }
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      border-left: 6px solid #007bff;
+      overflow-x: auto;
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #007bff;
+      text-align: left;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+      min-width: 700px;
+    }
+    table th, table td {
+      text-align: left;
+      padding: 8px;
+      border: 1px solid #ddd;
+      vertical-align: middle;
+    }
+    table th {
+      background-color: #f8f9fa;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .tab-buttons { margin-bottom: 20px; }
+    .tab-buttons button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin-right: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .tab-buttons button.active {
+      background-color: #0056b3;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* FAB */
+    .fab-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 999;
+    }
+    .fab-button {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: white;
+      font-size: 32px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .fab-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="{% static 'image/logo.png' %}" class="logo" alt="Logo" />
+        <span>COLLABORAML</span>
+      </div>
+      <div class="user-info-bar">
+        <img src="{% static 'image/icon.jpg' %}" alt="User">
+        <span class="name">Aiko</span>
+      </div>
+      <div class="nav">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'problem_framing' %}">Problem Framing</a>
+        <a href="{% url 'modeling' %}">Modeling</a>
+        <a href="{% url 'integrasi' %}" class="active">Integrasi</a>
+      </div>
+    </div>
+    <div class="logout">
+      <a href="#"><button>Logout</button></a>
+    </div>
+  </div>
+
+  <div class="main">
+    <h2>Laporan Integrasi Proses Creation</h2>
+    <div class="tab-buttons">
+      <button class="tab-btn active" data-tab="toexperience">Intellegence Engineering</button>
+      <button class="tab-btn" data-tab="request">Request Dataset</button>
+      <button class="tab-btn" data-tab="response">Response Dataset</button>
+      <button class="tab-btn" data-tab="project">Project Management</button>
+      <button class="tab-btn" data-tab="implement">System Implementation</button>
+    </div>
+
+    <!-- To Experience -->
+    <section class="tab-content active" id="toexperience">
+      <div class="card">
+        <h3>1. To Experience</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Projek</th>
+              <th>Meaningful</th>
+              <th>Experience</th>
+              <th>Implementasi</th>
+              <th>Batasan</th>
+              <th>Perencanaan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in toexperience %}
+            <tr>
+              <td>{{ t.namaProjek }}</td>
+              <td><a href="{{ t.meaningful }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+              <td><a href="{{ t.experience }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+              <td><a href="{{ t.implementasi }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+              <td><a href="{{ t.batasan }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+              <td><a href="{{ t.perencanaan }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">Tidak ada data experience</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Request Dataset -->
+    <section class="tab-content" id="request">
+      <div class="card">
+        <h3>2. Permintaan Dataset</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Model</th>
+              <th>Kebutuhan</th>
+              <th>Deskripsi</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in dataset_request %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ req.nama_model }}</td>
+              <td>{{ req.kebutuhan }}</td>
+              <td>{{ req.deskripsi }}</td>
+              <td>{{ req.timestamp }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Tidak ada permintaan</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Response Dataset -->
+    <section class="tab-content" id="response">
+      <div class="card">
+        <h3>3. Response Dataset</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Pengirim</th>
+              <th>Nama Model</th>
+              <th>Kebutuhan</th>
+              <th>Nama Dataset</th>
+              <th>Status</th>
+              <th>File</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for resp in dataset_response %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ resp.sender_name }}</td>
+              <td>{{ resp.nama_model }}</td>
+              <td>{{ resp.kebutuhan }}</td>
+              <td>{{ resp.dataset_name }}</td>
+              <td>{{ resp.dataset_status }}</td>
+              <td>
+                {% if resp.data_file %}
+                <a href="{{ resp.data_file }}" target="_blank"><i class="fas fa-file-download"></i></a>
+                {% else %}-{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">Tidak ada balasan</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Project Management -->
+    <section class="tab-content" id="project">
+      <div class="card">
+        <h3>4. Project Management</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Kelompok</th>
+              <th>Deskripsi Model</th>
+              <th>Status Model</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in project_models %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ p.nama_kelompok }}</td>
+              <td>{{ p.deskripsi_model|default:"-" }}</td>
+              <td>{{ p.status_model }}</td>
+              <td>{{ p.timestamp }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Tidak ada data project</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- System Implementation -->
+    <section class="tab-content" id="implement">
+      <div class="card">
+        <h3>5. System Implementation</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Model</th>
+              <th>Status Project</th>
+              <th>Laporan</th>
+              <th>Dokumentasi</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in final_models %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ f.nama_model }}</td>
+              <td>{{ f.status_project }}</td>
+              <td>
+                {% if f.laporan_model %}
+                <a href="{{ f.laporan_model }}" target="_blank"><i class="fas fa-file-download"></i></a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if f.dokumentasi_model %}
+                <a href="{{ f.dokumentasi_model }}" target="_blank"><i class="fas fa-link"></i></a>
+                {% else %}-{% endif %}
+              </td>
+              <td>{{ f.timestamp }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">Tidak ada data implementasi</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Floating FAB -->
+    <div class="fab-container">
+      <button class="fab-button" id="fabButton">+</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const fabButton = document.getElementById('fabButton');
+
+  function updateFabLink(tabId) {
+    let url = "#";
+    switch(tabId) {
+      case 'request':
+        url = "{% url 'form_dataset_request' %}";
+        break;
+      case 'project':
+        url = "{% url 'form_project_management' %}";
+        break;
+      case 'implement':
+        url = "{% url 'form_system_implementation' %}";
+        break;
+      default:
+        url = "#"; // No FAB for other tabs
+    }
+    fabButton.onclick = () => window.location.href = url;
+    fabButton.style.display = (url === "#") ? "none" : "flex";
+  }
+
+  updateFabLink('toexperience');
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.getAttribute('data-tab');
+      document.getElementById(tab).classList.add('active');
+      updateFabLink(tab);
+    });
+  });
+</script>
+</body>
+</html>

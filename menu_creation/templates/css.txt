@@ -1,0 +1,721 @@
+<style> 
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 180px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar-header, .user-info-bar, .nav, .logout {
+      padding: 15px;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar-header img.logo {
+      width: 26px;
+      margin-right: 8px;
+    }
+    .sidebar-header span {
+      font-weight: bold;
+      color: #007bff;
+      font-size: 14px;
+    }
+    .user-info-bar {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .user-info-bar img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .user-info-bar .name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .nav a {
+      display: block;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #007bff;
+      border: 1px solid #007bff;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .nav a.active,
+    .nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .logout {
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+    .logout button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 80%;
+      transition: background-color 0.3s ease;
+    }
+    .logout button:hover {
+      background-color: #c82333;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+      background-color: #f5f5f5;
+      overflow-y: auto;
+    }
+    .card {
+      background-color: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    /* Status label styles */
+    .status {
+      padding: 4px 10px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-block;
+      text-transform: capitalize;
+      width: fit-content;
+    }
+    .status.success { background-color: #28a745; }
+    .status.failed { background-color: #dc3545; }
+    .status.ongoing { background-color: #ffc107; color: #212529; }
+    .status.pending { background-color: #6c757d; }
+    .status.deployed { background-color: #17a2b8; }
+
+    /* Action buttons container */
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    /* Action buttons: Edit, View, Delete */
+    .action-btn {
+      border: 1px solid #007bff;
+      background-color: white;
+      color: #007bff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background-color 0.3s, color 0.3s;
+      white-space: nowrap;
+    }
+    .action-btn:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    /* Delete button style */
+    .btn-delete {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    .btn-delete:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    /* Icon buttons for Print and PDF */
+    .icon-btn {
+      border: 1px solid #007bff;
+      background-color: white;
+      padding: 5px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, border-color 0.3s;
+      color: #007bff;
+      font-size: 14px;
+      width: 32px;
+      height: 32px;
+    }
+    .icon-btn:hover {
+      background-color: #007bff;
+      color: white;
+      border-color: #0056b3;
+    }
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* Modal overlay */
+    /* Modal styles */
+    #modalOverlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    #modalContent {
+      background: white;
+      padding: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: 6px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+    }
+    form label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    form input[type=text],
+    form select,
+    form textarea {
+      width: 100%;
+      padding: 6px;
+      margin-top: 3px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    form textarea {
+      resize: vertical;
+    }
+    .btn-view {
+      margin-top: 15px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .btn-view:hover {
+      background: #219150;
+    }
+
+    #searchInput {
+      padding: 8px;
+      width: 100%;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+</style> 
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History - CollaborAML</title>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+ 
+
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div>
+        <div class="sidebar-header">
+          <img src="{% static 'image/logo.png' %}" class="logo" alt="Logo" />
+          <span>COLLABORAML</span>
+        </div>
+        <div class="user-info-bar">
+          <img src="{% static 'image/icon.jpg' %}" alt="User" />
+          <div class="details">
+            <div class="name">Aiko</div>
+          </div>
+        </div>
+        <div class="nav">
+          <a href="{% url 'dashboard' %}">Dashboard</a>
+          <a href="{% url 'modeling' %}" class="active">Modeling</a>
+          <a href="{% url 'creation_entry' %}">Creation Entry</a>
+          <a href="{% url 'integrasi' %}" >integrasi</a>
+          
+        </div>
+      </div>
+      <div class="logout">
+        <a href="{% url 'index' %}" style="text-decoration: none;">
+          <button>Logout</button>
+        </a>
+      </div>
+    </div>
+
+    <div class="main">
+      <input type="text" id="searchInput" placeholder="Cari data..." onkeyup="searchTable()" />
+
+    <div class="main">
+      <div class="card">
+        <h2>Riwayat Model dan Deployment</h2>
+<table id="historyTable">
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Model</th>
+      <th>Target</th>
+      <th>Kategori</th>
+      <th>Accuracy</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Data rows will be generated here -->
+  </tbody>
+</table>
+
+<!-- Modal -->
+<div id="modalOverlay">
+  <div id="modalContent">
+    <span class="modal-close" title="Close">&times;</span>
+    <!-- Modal content dynamically injected here -->
+  </div>
+</div>
+
+<script>
+ 
+  // Fungsi renderTable() sudah ada...
+
+  function searchTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const filteredData = defaultData.filter(item => {
+      return (
+        item.title.toLowerCase().includes(input) ||
+        item.target.toLowerCase().includes(input) ||
+        item.category.toLowerCase().includes(input) ||
+        item.accuracy.toLowerCase().includes(input) ||
+        item.status.toLowerCase().includes(input)
+      );
+    });
+    data = filteredData;
+    renderTable();
+  }
+
+
+  // 11 default data with all fields included
+  const defaultData = [
+    {id: 1, title: 'Prediksi Cuaca', target: 'Curah Hujan', accuracy: '85%', status: 'success', from:'BMKG', features: 'Suhu, Tekanan, Kelembaban', jenis:'Numerical', category: 'Regresi', input: 'Data Cuaca', process: 'Decision Tree', output: 'Curah Hujan', algorithm: 'Decision Tree', start: '2023-01-01', end: '2023-02-01', deployment: 'yes', activity: 'Data Preparation, Feature Engineering'},
+    {id: 2, title: 'Klasifikasi Iris', target: 'Jenis Bunga', accuracy: '98%', status: 'success', from:'Iris Dataset', features: 'Panjang Kelopak, Lebar Kelopak', jenis:'Numerical', category: 'Klasifikasi', input: 'Data Iris', process: 'SVM', output: 'Jenis Iris', algorithm: 'Support Vector Machine', start: '2023-01-15', end: '2023-02-15', deployment: 'yes', activity: 'Data Cleaning'},
+    {id: 3, title: 'Prediksi Suhu', target: 'Suhu', accuracy: '90%', status: 'ongoing', from:'Weather API', features: 'Suhu, Kelembaban', jenis:'Numerical', category: 'Regresi', input: 'Suhu, Kelembaban', process: 'Random Forest', output: 'Suhu', algorithm: 'Random Forest', start: '2023-03-01', end: '2023-04-01', deployment: 'yes', activity: 'Data Cleaning, Feature Extraction'},
+    {id: 4, title: 'Klasifikasi Email Spam', target: 'Spam', accuracy: '95%', status: 'success', from:'Email Dataset', features: 'Kata-kata', jenis:'Text', category: 'Klasifikasi', input: 'Email Text', process: 'Naive Bayes', output: 'Spam/Not Spam', algorithm: 'Naive Bayes', start: '2022-11-10', end: '2022-12-10', deployment: 'yes', activity: 'Text Preprocessing'},
+    {id: 5, title: 'Analisis Sentimen', target: 'Sentimen', accuracy: '88%', status: 'ongoing', from:'Twitter API', features: 'Tweet Text', jenis:'Text', category: 'Klasifikasi', input: 'Tweet Text', process: 'SVM', output: 'Positive/Negative', algorithm: 'Support Vector Machine', start: '2023-02-15', end: '2023-03-15', deployment: 'no', activity: 'Tokenization, Stopwords Removal'},
+    {id: 6, title: 'Deteksi Penyakit', target: 'Diagnosis', accuracy: '80%', status: 'pending', from:'Hospital Data', features: 'Gejala', jenis:'Categorical', category: 'Klasifikasi', input: 'Gejala Pasien', process: 'Neural Network', output: 'Diagnosis', algorithm: 'Neural Network', start: '2023-04-01', end: '2023-05-01', deployment: 'no', activity: 'Data Labeling'},
+    {id: 7, title: 'Prediksi Penjualan', target: 'Jumlah', accuracy: '78%', status: 'failed', from:'Sales Data', features: 'Data Penjualan', jenis:'Numerical', category: 'Regresi', input: 'Penjualan Bulanan', process: 'Linear Regression', output: 'Jumlah Penjualan', algorithm: 'Linear Regression', start: '2023-01-20', end: '2023-02-20', deployment: 'no', activity: 'Data Normalization'},
+    {id: 8, title: 'Klasifikasi Gambar', target: 'Label', accuracy: '92%', status: 'success', from:'Image Dataset', features: 'Gambar', jenis:'Image', category: 'Klasifikasi', input: 'Pixel Data', process: 'CNN', output: 'Label Gambar', algorithm: 'Convolutional Neural Network', start: '2023-03-10', end: '2023-04-10', deployment: 'yes', activity: 'Data Augmentation'},
+    {id: 9, title: 'Rekomendasi Film', target: 'Rating', accuracy: '87%', status: 'ongoing', from:'User Rating', features: 'Data User', jenis:'Numerical', category: 'Regresi', input: 'Rating User', process: 'Collaborative Filtering', output: 'Rating Film', algorithm: 'Matrix Factorization', start: '2023-02-05', end: '2023-03-05', deployment: 'no', activity: 'Similarity Calculation'},
+    {id: 10, title: 'Prediksi Kredit', target: 'Approval', accuracy: '82%', status: 'deployed', from:'Bank Data', features: 'Data Kredit', jenis:'Categorical', category: 'Klasifikasi', input: 'Data Nasabah', process: 'Logistic Regression', output: 'Approval Kredit', algorithm: 'Logistic Regression', start: '2023-01-25', end: '2023-02-25', deployment: 'yes', activity: 'Feature Scaling'},
+    {id: 11, title: 'Deteksi Penipuan', target: 'Fraud', accuracy: '94%', status: 'success', from:'Transaction Data', features: 'Transaksi', jenis:'Numerical', category: 'Klasifikasi', input: 'Data Transaksi', process: 'Random Forest', output: 'Fraud/Not Fraud', algorithm: 'Random Forest', start: '2023-03-15', end: '2023-04-15', deployment: 'yes', activity: 'Anomaly Detection'}
+  ];
+
+  let data = [...defaultData];
+
+  const tbody = document.querySelector('#historyTable tbody');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modalCloseBtn = document.querySelector('.modal-close');
+
+  function renderTable() {
+    tbody.innerHTML = '';
+    data.forEach((item, idx) => {
+      const tr = document.createElement('tr');
+
+      // No
+      const tdNo = document.createElement('td');
+      tdNo.textContent = idx + 1;
+      tr.appendChild(tdNo);
+
+      // Model
+      const tdModel = document.createElement('td');
+      tdModel.textContent = item.title;
+      tr.appendChild(tdModel);
+
+      // Target
+      const tdTarget = document.createElement('td');
+      tdTarget.textContent = item.target;
+      tr.appendChild(tdTarget);
+
+      // Kategori
+      const tdCategory = document.createElement('td');
+      tdCategory.textContent = item.category;
+      tr.appendChild(tdCategory);
+
+      // Accuracy
+      const tdAcc = document.createElement('td');
+      tdAcc.textContent = item.accuracy;
+      tr.appendChild(tdAcc);
+
+      // Status - no color
+      const tdStatus = document.createElement('td');
+      tdStatus.textContent = item.status;
+      tr.appendChild(tdStatus);
+
+      // Action buttons container
+      const tdAction = document.createElement('td');
+      tdAction.classList.add('action-buttons');
+
+      // Edit button
+      const btnEdit = document.createElement('button');
+      btnEdit.className = 'action-btn';
+      btnEdit.textContent = 'Edit';
+      btnEdit.title = 'Edit model';
+      btnEdit.onclick = () => openEditModal(idx);
+      tdAction.appendChild(btnEdit);
+
+      // View button
+      const btnView = document.createElement('button');
+      btnView.className = 'action-btn';
+      btnView.textContent = 'View';
+      btnView.title = 'View model details';
+      btnView.onclick = () => openViewModal(idx);
+      tdAction.appendChild(btnView);
+
+      // Delete button
+      const btnDelete = document.createElement('button');
+      btnDelete.className = 'action-btn btn-delete';
+      btnDelete.textContent = 'Delete';
+      btnDelete.title = 'Delete model';
+      btnDelete.onclick = () => deleteModel(idx);
+      tdAction.appendChild(btnDelete);
+
+      // Print icon button
+      const btnPrint = document.createElement('button');
+      btnPrint.className = 'icon-btn';
+      btnPrint.title = 'Print Report';
+      btnPrint.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.1 0-2 .9-2 2v6h4v4h10v-4h4v-6c0-1.1-.9-2-2-2zM7 18v-4h10v4H7zM17 3H7v3h10V3z"/></svg>
+      `;
+      btnPrint.onclick = () => printReport(item);
+      tdAction.appendChild(btnPrint);
+
+      // PDF icon button
+      const btnPDF = document.createElement('button');
+      btnPDF.className = 'icon-btn';
+      btnPDF.title = 'Export PDF';
+      btnPDF.innerHTML = `
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 2H8c-1.1 0-2 .9-2 2v3H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 7V4h11v14H5V9h1v-2zm7 8h-2v-2h2v2z"/></svg>
+      `;
+      btnPDF.onclick = () => exportPDF(item);
+      tdAction.appendChild(btnPDF);
+
+      tr.appendChild(tdAction);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Modal open functions for Edit and View
+
+  function openEditModal(index) {
+    const d = data[index];
+    modalContent.innerHTML = `
+      <span class="modal-close" title="Close">&times;</span>
+      <h3>Edit Model</h3>
+      <form id="editForm">
+        <input type="hidden" id="editIndex" value="${index}" />
+        <label for="editTitle">Judul:</label>
+        <input type="text" id="editTitle" value="${escapeHTML(d.title)}" required />
+
+        <label for="editTarget">Target:</label>
+        <input type="text" id="editTarget" value="${escapeHTML(d.target)}" required />
+
+        <label for="editCategory">Kategori:</label>
+        <input type="text" id="editCategory" value="${escapeHTML(d.category)}" required />
+
+        <label for="editStatus">Status:</label>
+        <select id="editStatus" required>
+          <option value="success" ${d.status === 'success' ? 'selected' : ''}>Success</option>
+          <option value="ongoing" ${d.status === 'ongoing' ? 'selected' : ''}>Ongoing</option>
+          <option value="failed" ${d.status === 'failed' ? 'selected' : ''}>Failed</option>
+          <option value="pending" ${d.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="deployed" ${d.status === 'deployed' ? 'selected' : ''}>Deployed</option>
+        </select>
+
+        <label for="editInput">Input:</label>
+        <textarea id="editInput" rows="2" required>${escapeHTML(d.input)}</textarea>
+
+        <label for="editProcess">Proses:</label>
+        <textarea id="editProcess" rows="2" required>${escapeHTML(d.process)}</textarea>
+
+        <label for="editOutput">Output:</label>
+        <textarea id="editOutput" rows="2" required>${escapeHTML(d.output)}</textarea>
+
+        <label for="editAlgorithm">Algoritma:</label>
+        <textarea id="editAlgorithm" rows="2" required>${escapeHTML(d.algorithm)}</textarea>
+
+        <label for="editAccuracy">Akurasi:</label>
+        <input type="text" id="editAccuracy" value="${escapeHTML(d.accuracy)}" required />
+
+        <label for="editActivity">Aktivitas Pemrosesan Data:</label>
+        <textarea id="editActivity" rows="3" required>${escapeHTML(d.activity)}</textarea>
+
+        <button type="submit" class="btn-view">Simpan</button>
+      </form>
+    `;
+
+    // reattach close event to new modal close button
+    modalContent.querySelector('.modal-close').onclick = closeModal;
+
+    // attach save event
+    const form = modalContent.querySelector('#editForm');
+    form.onsubmit = saveEdit;
+
+    showModal();
+  }
+
+  function openViewModal(index) {
+  const d = data[index];
+
+  modalContent.innerHTML = `
+    <span class="modal-close" title="Close">&times;</span>
+    <h3>Lihat Detail Model (Read Only)</h3>
+    <form>
+      <input type="hidden" id="viewIndex" value="${index}">
+      
+      <label>Judul:</label>
+      <input type="text" value="${escapeHTML(d.title)}" readonly><br>
+
+      <label>Target:</label>
+      <input type="text" value="${escapeHTML(d.target)}" readonly><br>
+
+      <label>Kategori:</label>
+      <input type="text" value="${escapeHTML(d.category)}" readonly><br>
+
+      <label>Status:</label>
+      <input type="text" value="${escapeHTML(d.status)}" readonly><br>
+
+      <label>Input:</label>
+      <input type="text" value="${escapeHTML(d.input)}" readonly><br>
+
+      <label>Proses:</label>
+      <input type="text" value="${escapeHTML(d.process)}" readonly><br>
+
+      <label>Output:</label>
+      <input type="text" value="${escapeHTML(d.output)}" readonly><br>
+
+      <label>Algoritma:</label>
+      <input type="text" value="${escapeHTML(d.algorithm)}" readonly><br>
+
+      <label>Akurasi:</label>
+      <input type="text" value="${escapeHTML(d.accuracy)}" readonly><br>
+
+      <label>Aktivitas Pemrosesan Data:</label>
+      <input type="text" value="${escapeHTML(d.activity)}" readonly><br>
+
+      <label>From:</label>
+      <input type="text" value="${escapeHTML(d.from)}" readonly><br>
+
+      <label>Features:</label>
+      <input type="text" value="${escapeHTML(d.features)}" readonly><br>
+
+      <label>Jenis Data:</label>
+      <input type="text" value="${escapeHTML(d.jenis)}" readonly><br>
+    </form>
+  `;
+  modalContent.querySelector('.modal-close').onclick = closeModal;
+  showModal();
+}
+
+  // Save edited data
+  function saveEdit(event) {
+    event.preventDefault();
+    const idx = +document.getElementById('editIndex').value;
+    data[idx].title = document.getElementById('editTitle').value.trim();
+    data[idx].target = document.getElementById('editTarget').value.trim();
+    data[idx].category = document.getElementById('editCategory').value.trim();
+    data[idx].status = document.getElementById('editStatus').value;
+    data[idx].input = document.getElementById('editInput').value.trim();
+    data[idx].process = document.getElementById('editProcess').value.trim();
+    data[idx].output = document.getElementById('editOutput').value.trim();
+    data[idx].algorithm = document.getElementById('editAlgorithm').value.trim();
+    data[idx].accuracy = document.getElementById('editAccuracy').value.trim();
+    data[idx].activity = document.getElementById('editActivity').value.trim();
+    closeModal();
+    renderTable();
+  }
+
+  // Delete data
+  function deleteModel(index) {
+    if(confirm('Yakin ingin menghapus model ini?')) {
+      data.splice(index, 1);
+      renderTable();
+    }
+  }
+
+  // Print report with table format
+  function printReport(d) {
+    const printWindow = window.open('', '', 'width=700,height=600');
+    printWindow.document.write('<html><head><title>Print Report</title>');
+    printWindow.document.write('<style>table {border-collapse: collapse; width: 100%;} th,td {border: 1px solid #333; padding: 8px; text-align: left;} th {background: #eee;}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h3>Riwayat Model dan Deployment</h3>');
+    printWindow.document.write('<table>');
+    printWindow.document.write('<tbody>');
+    printWindow.document.write(`<tr><th>Judul</th><td>${escapeHTML(d.title)}</td></tr>`);
+    printWindow.document.write(`<tr><th>From</th><td>${escapeHTML(d.from)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Target</th><td>${escapeHTML(d.target)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Kategori</th><td>${escapeHTML(d.category)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Features</th><td>${escapeHTML(d.features)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Jenis Data</th><td>${escapeHTML(d.jenis)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Accuracy</th><td>${escapeHTML(d.accuracy)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Start</th><td>${escapeHTML(d.start)}</td></tr>`);
+    printWindow.document.write(`<tr><th>End</th><td>${escapeHTML(d.end)}</td></tr>`);
+    printWindow.document.write(`<tr><th>Deployment</th><td>${escapeHTML(d.deployment)}</td></tr>`);
+    printWindow.document.write('</tbody></table>');
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
+
+  // Export PDF with table using jsPDF autotable plugin
+  async function exportPDF(d) {
+    // Using jsPDF autotable for better table in PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Riwayat Model dan Deployment', 14, 20);
+
+    const tableColumn = ['Label', 'Value'];
+    const tableRows = [
+      ['Judul', d.title],
+      ['From', d.from],
+      ['Target', d.target],
+      ['Kategori', d.category],
+      ['Features', d.features],
+      ['Jenis Data', d.jenis],
+      ['Accuracy', d.accuracy],
+      ['Start', d.start],
+      ['End', d.end],
+      ['Deployment', d.deployment]
+    ];
+
+    // Check if autotable is available
+    if (doc.autoTable) {
+      doc.autoTable({
+  startY: 30,
+  head: [tableColumn],
+  body: tableRows,
+  theme: 'grid',
+  styles: { 
+    fontSize: 11,
+    textColor: [0, 0, 0] // warna teks hitam
+  },
+  headStyles: { 
+    fillColor: [230, 230, 230],
+    textColor: [0, 0, 0] // judul kolom juga hitam
+  }
+});
+    } else {
+      // fallback if autotable not loaded
+      let y = 30;
+      tableRows.forEach(([label, value]) => {
+        doc.text(`${label}: ${value}`, 14, y);
+        y += 10;
+      });
+    }
+
+    doc.save(`${d.title.replace(/\s+/g, '_')}_Report.pdf`);
+  }
+
+  // Show modal
+  function showModal() {
+    modalOverlay.style.display = 'flex';
+  }
+  // Close modal
+  function closeModal() {
+    modalOverlay.style.display = 'none';
+  }
+  modalCloseBtn.onclick = closeModal;
+  modalOverlay.onclick = e => {
+    if (e.target === modalOverlay) closeModal();
+  };
+
+  // Escape HTML for safe injection
+  function escapeHTML(text) {
+    if (!text) return '';
+    return text.replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  renderTable();
+</script>
+</body>
+</html>

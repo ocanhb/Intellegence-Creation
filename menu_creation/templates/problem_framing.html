@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Problem Framing - CollaborAML</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 180px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar-header, .user-info-bar, .nav, .logout {
+      padding: 15px;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar-header img.logo {
+      width: 26px;
+      margin-right: 8px;
+    }
+    .sidebar-header span {
+      font-weight: bold;
+      color: #007bff;
+      font-size: 14px;
+    }
+    .user-info-bar {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .user-info-bar img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .user-info-bar .name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .nav a {
+      display: block;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #007bff;
+      border: 1px solid #007bff;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .nav a.active, .nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .logout {
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #eee;
+    }
+    .logout button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 80%;
+      transition: background-color 0.3s ease;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+      background-color: #f5f5f5;
+      overflow-y: auto;
+    }
+    .card {
+      background-color: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+  background-color: #007bff;
+  color: white;
+  text-align: center; /* Tambahan ini bikin judul kolom rata tengah */
+}
+
+    th:nth-child(1), td:nth-child(1) {
+      width: 40px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+    .action-btn {
+      border: 1px solid #007bff;
+      background-color: white;
+      color: #007bff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .action-btn:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-delete {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    .btn-delete:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+    .fab-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+    }
+    .fab-button {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: white;
+      font-size: 32px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .fab-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div>
+        <div class="sidebar-header">
+          <img src="{% static 'image/logo.png' %}" class="logo" alt="Logo" />
+          <span>COLLABORAML</span>
+        </div>
+        <div class="user-info-bar">
+          <img src="{% static 'image/icon.jpg' %}" alt="User" />
+          <div class="name">Aiko</div>
+        </div>
+        <div class="nav">
+          <a href="{% url 'dashboard' %}">Dashboard</a>
+          <a href="{% url 'problem_framing' %}" class="active">Problem Framing</a>
+          <a href="{% url 'modeling' %}">Modeling</a>
+          <a href="{% url 'integrasi' %}">Integrasi</a>
+        </div>
+      </div>
+      <div class="logout">
+        <a href="{% url 'index' %}" style="text-decoration: none;">
+          <button>Logout</button>
+        </a>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="card">
+        <h2>Problem Framing</h2>
+        <table id="problemTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Problem Project</th>
+              <th>Deskripsi</th>
+              <th>Input</th>
+              <th>Proses</th>
+              <th>Output</th>
+              <th>Dataset</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="8" style="text-align:center; color:gray;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fab-container">
+        <button class="fab-button" onclick="window.location.href='/problem-framing-form/'">+</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchData() {
+      const res = await fetch('/api/problem-framing/');
+      const data = await res.json();
+      renderTable(data);
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector('#problemTable tbody');
+      tbody.innerHTML = '';
+
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:gray;">Belum ada data</td></tr>';
+        return;
+      }
+
+      data.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${item.problem_name}</td>
+          <td>${item.problem_statement}</td>
+          <td>${item.input_features}</td>
+          <td>${item.planned_process}</td>
+          <td>${item.expected_output}</td>
+          <td>${item.dataset_needed}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn" onclick="window.location.href='/problem_framing_form/${item.id}/edit/'">Edit</button>
+              <button class="action-btn btn-delete" onclick="deleteItem(${item.id})">Hapus</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Yakin ingin menghapus item ini?')) return;
+      await fetch(`/api/problem-framing/${id}/`, { method: 'DELETE' });
+      fetchData();
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>

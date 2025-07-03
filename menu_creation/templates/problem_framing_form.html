@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Form Problem Framing - CollaborAML</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 180px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar-header, .user-info-bar, .nav, .logout {
+      padding: 15px;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar-header img.logo {
+      width: 26px;
+      margin-right: 8px;
+    }
+    .sidebar-header span {
+      font-weight: bold;
+      color: #007bff;
+      font-size: 14px;
+    }
+    .user-info-bar {
+      display: flex;
+      align-items: center;
+    }
+    .user-info-bar img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .user-info-bar .name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .nav a {
+      display: block;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #007bff;
+      border: 1px solid #007bff;
+    }
+    .nav a.active, .nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .logout {
+      text-align: center;
+      padding: 10px;
+    }
+    .logout button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 80%;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      margin-bottom: 22px;
+      font-weight: 700;
+      color: #333;
+    }
+    form {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-section {
+      flex-direction: column;
+      gap: 25px;
+      background: white;
+      padding: 18px 22px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 13.5px;
+      border-radius: 5px;
+      border: 1px solid #bbb;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.4;
+    }
+    button[type="submit"] {
+      margin-top: 18px;
+      padding: 11px 28px;
+      background-color: #007bff;
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      align-self: flex-end;
+    }
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <img src="{% static 'image/logo.png' %}" class="logo" alt="Logo" />
+        <span>COLLABORAML</span>
+      </div>
+      <div class="user-info-bar">
+        <img src="{% static 'image/icon.jpg' %}" alt="User" />
+        <div class="name">Aiko</div>
+      </div>
+      <div class="nav">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'problem_framing_form' %}" class="active">Problem Framing</a>
+        <a href="{% url 'modeling' %}">Modeling</a>
+        <a href="{% url 'integrasi' %}">Integrasi</a>
+      </div>
+    </div>
+    <div class="logout">
+      <a href="{% url 'index' %}" style="text-decoration: none;">
+        <button>Logout</button>
+      </a>
+    </div>
+  </div>
+
+  <div class="main">
+    <h2>📌 Form Problem Framing</h2>
+    <form method="post">
+      {% csrf_token %}
+      <section class="form-section">
+        <div class="form-group">
+          <label for="problem_name">Nama Problem Project</label>
+          <input type="text" id="problem_name" name="problem_name" placeholder="Prediksi Harga Rumah" required />
+        </div>
+        <div class="form-group">
+          <label for="problem_statement">Deskripsi Masalah</label>
+          <textarea id="problem_statement" name="problem_statement" placeholder="Menentukan harga rumah berdasarkan lokasi, luas tanah, dan fasilitas..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="input_features">Input (Fitur yang Digunakan)</label>
+          <textarea id="input_features" name="input_features" placeholder="Luas bangunan, jumlah kamar, lokasi, tipe rumah..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="planned_process">Proses (Metode yang Direncanakan)</label>
+          <textarea id="planned_process" name="planned_process" placeholder="Data preprocessing, training menggunakan Random Forest, evaluasi model..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="expected_output">Output (Hasil yang Diharapkan)</label>
+          <input type="text" id="expected_output" name="expected_output" placeholder="Harga Rumah dalam Rupiah" required />
+        </div>
+        <div class="form-group">
+          <label for="dataset_needed">Kebutuhan Dataset</label>
+          <textarea id="dataset_needed" name="dataset_needed" placeholder="Data listing rumah dari marketplace properti, data demografi dan harga pasar..." required></textarea>
+        </div>
+        <button type="submit">Simpan</button>
+      </section>
+    </form>
+  </div>
+</div>
+</body>
+</html>
