@@ -31,10 +31,19 @@
       width: 26px;
       margin-right: 8px;
     }
+    .sidebar-header div {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
     .sidebar-header span {
       font-weight: bold;
       color: #007bff;
       font-size: 14px;
+    }
+    .sidebar-header small {
+      font-size: 11px;
+      color: #555;
     }
     .user-info-bar {
       display: flex;
@@ -136,7 +145,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* FAB */
     .fab-container {
       position: fixed;
       bottom: 30px;
@@ -168,7 +176,9 @@
     <div>
       <div class="sidebar-header">
         <img src="{% static 'image/logo.png' %}" class="logo" alt="Logo" />
-        <span>COLLABORAML</span>
+        <div>
+          <span>COLLABORAML</span>
+        </div>
       </div>
       <div class="user-info-bar">
         <img src="{% static 'image/icon.jpg' %}" alt="User">
@@ -182,7 +192,9 @@
       </div>
     </div>
     <div class="logout">
-      <a href="#"><button>Logout</button></a>
+      <a href="{% url 'index' %}" style="text-decoration: none;">
+        <button>Logout</button>
+      </a>
     </div>
   </div>
 
@@ -199,30 +211,68 @@
     <!-- To Experience -->
     <section class="tab-content active" id="toexperience">
       <div class="card">
-        <h3>1. To Experience</h3>
+        <h3>1. Intellegence Engineering</h3>
         <table>
           <thead>
             <tr>
+              <th>No</th>
               <th>Nama Projek</th>
               <th>Meaningful</th>
               <th>Experience</th>
               <th>Implementasi</th>
               <th>Batasan</th>
               <th>Perencanaan</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {% for t in toexperience %}
             <tr>
+              <td>{{ forloop.counter }}</td>
               <td>{{ t.namaProjek }}</td>
-              <td><a href="{{ t.meaningful }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
-              <td><a href="{{ t.experience }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
-              <td><a href="{{ t.implementasi }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
-              <td><a href="{{ t.batasan }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
-              <td><a href="{{ t.perencanaan }}" target="_blank"><i class="fas fa-file-download"></i></a></td>
+              <td>
+                {% if t.meaningful %}
+                  <a href="{{ t.meaningful.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Meaningful
+                  </a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if t.experience %}
+                  <a href="{{ t.experience.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Experience
+                  </a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if t.implementasi %}
+                  <a href="{{ t.implementasi.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Implementasi
+                  </a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if t.batasan %}
+                  <a href="{{ t.batasan.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Batasan
+                  </a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                {% if t.perencanaan %}
+                  <a href="{{ t.perencanaan.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Perencanaan
+                  </a>
+                {% else %}-{% endif %}
+              </td>
+              <td>
+                <a href="{% url 'delete_toexperience' t.id %}" onclick="return confirm('Yakin hapus data ini?')">
+                  <i class="fas fa-trash-alt" style="color:red;"></i>
+                </a>
+              </td>
             </tr>
             {% empty %}
-            <tr><td colspan="6">Tidak ada data experience</td></tr>
+            <tr><td colspan="8">Tidak ada data experience</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -240,7 +290,7 @@
               <th>Nama Model</th>
               <th>Kebutuhan</th>
               <th>Deskripsi</th>
-              <th>Timestamp</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -250,7 +300,11 @@
               <td>{{ req.nama_model }}</td>
               <td>{{ req.kebutuhan }}</td>
               <td>{{ req.deskripsi }}</td>
-              <td>{{ req.timestamp }}</td>
+              <td>
+                <a href="{% url 'delete_request_dataset' req.id %}" onclick="return confirm('Yakin hapus data ini?')">
+                  <i class="fas fa-trash-alt" style="color:red;"></i>
+                </a>
+              </td>
             </tr>
             {% empty %}
             <tr><td colspan="5">Tidak ada permintaan</td></tr>
@@ -268,27 +322,33 @@
           <thead>
             <tr>
               <th>No</th>
-              <th>Pengirim</th>
               <th>Nama Model</th>
               <th>Kebutuhan</th>
               <th>Nama Dataset</th>
               <th>Status</th>
-              <th>File</th>
+              <th>File Dataset</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {% for resp in dataset_response %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{ resp.sender_name }}</td>
               <td>{{ resp.nama_model }}</td>
               <td>{{ resp.kebutuhan }}</td>
               <td>{{ resp.dataset_name }}</td>
               <td>{{ resp.dataset_status }}</td>
               <td>
                 {% if resp.data_file %}
-                <a href="{{ resp.data_file }}" target="_blank"><i class="fas fa-file-download"></i></a>
+                  <a href="{{ resp.data_file.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> File Dataset
+                  </a>
                 {% else %}-{% endif %}
+              </td>
+              <td>
+                <a href="{% url 'delete_response_dataset' resp.id %}" onclick="return confirm('Yakin hapus data ini?')">
+                  <i class="fas fa-trash-alt" style="color:red;"></i>
+                </a>
               </td>
             </tr>
             {% empty %}
@@ -310,7 +370,7 @@
               <th>Nama Kelompok</th>
               <th>Deskripsi Model</th>
               <th>Status Model</th>
-              <th>Timestamp</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -320,7 +380,11 @@
               <td>{{ p.nama_kelompok }}</td>
               <td>{{ p.deskripsi_model|default:"-" }}</td>
               <td>{{ p.status_model }}</td>
-              <td>{{ p.timestamp }}</td>
+              <td>
+                <a href="{% url 'delete_project_management' p.id %}" onclick="return confirm('Yakin hapus data ini?')">
+                  <i class="fas fa-trash-alt" style="color:red;"></i>
+                </a>
+              </td>
             </tr>
             {% empty %}
             <tr><td colspan="5">Tidak ada data project</td></tr>
@@ -342,7 +406,7 @@
               <th>Status Project</th>
               <th>Laporan</th>
               <th>Dokumentasi</th>
-              <th>Timestamp</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -353,15 +417,23 @@
               <td>{{ f.status_project }}</td>
               <td>
                 {% if f.laporan_model %}
-                <a href="{{ f.laporan_model }}" target="_blank"><i class="fas fa-file-download"></i></a>
+                  <a href="{{ f.laporan_model.url }}" target="_blank">
+                    <i class="fas fa-file-download"></i> Laporan
+                  </a>
                 {% else %}-{% endif %}
               </td>
               <td>
                 {% if f.dokumentasi_model %}
-                <a href="{{ f.dokumentasi_model }}" target="_blank"><i class="fas fa-link"></i></a>
+                  <a href="{{ f.dokumentasi_model.url }}" target="_blank">
+                    <i class="fas fa-link"></i> Dokumentasi
+                  </a>
                 {% else %}-{% endif %}
               </td>
-              <td>{{ f.timestamp }}</td>
+              <td>
+                <a href="{% url 'delete_system_implementation' f.id %}" onclick="return confirm('Yakin hapus data ini?')">
+                  <i class="fas fa-trash-alt" style="color:red;"></i>
+                </a>
+              </td>
             </tr>
             {% empty %}
             <tr><td colspan="6">Tidak ada data implementasi</td></tr>
@@ -394,7 +466,7 @@
         url = "{% url 'form_system_implementation' %}";
         break;
       default:
-        url = "#"; // No FAB for other tabs
+        url = "#";
     }
     fabButton.onclick = () => window.location.href = url;
     fabButton.style.display = (url === "#") ? "none" : "flex";

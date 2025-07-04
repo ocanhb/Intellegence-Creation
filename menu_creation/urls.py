@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import views 
+from . import views
 from .views import (
     terima_creation_entry,
     CreationEntryView,
@@ -8,7 +8,7 @@ from .views import (
     DatasetSentListAPIView,
     ProjectManagementAPI,
     SystemImplementationAPI,
-    integrasi_view, 
+    integrasi_view,
     download_view
 )
 from rest_framework.routers import DefaultRouter
@@ -20,7 +20,7 @@ router.register(r'engineering', ToExperienceViewSet, basename='engineering')
 
 urlpatterns = [
     # Halaman frontend
-    path('index/', views.index_view, name='index'),
+    path('', views.index_view, name='index'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('modeling/', views.modeling_view, name='modeling'),
     path('creation/', views.creation_entry, name='creation_entry'),
@@ -41,7 +41,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('integrasi/', integrasi_view, name='integrasi'),
     path('download/<path:path>', download_view, name='download'),
-    
+     path('download/<path:file_path>/', views.download_view, name='download_view'),
+
     path('problem-framing/', views.problem_framing_page, name='problem_framing'),
     path('problem-framing-form/', views.problem_framing_form, name='problem_framing_form'),
     path('problem-framing-form/<int:pk>/edit/', views.problem_framing_form, name='problem_framing_edit'),
@@ -63,6 +64,11 @@ urlpatterns = [
     path('api/project-management/', views.api_list_project_management, name='api_project_management'),
     path('api/dataset-response/', views.api_list_dataset_response, name='api_list_dataset_response'),
     path('api/engineering-data/', views.api_list_engineering_data, name='api_list_engineering_data'),
-
+    path('terima-dataset/', views.terima_dataset_api, name='terima_dataset_api'),
+    path('toexperience/<int:id>/delete/', views.delete_toexperience, name='delete_toexperience'),
+    path('request-dataset/<int:id>/delete/', views.delete_request_dataset, name='delete_request_dataset'),
+    path('response-dataset/<int:id>/delete/', views.delete_response_dataset, name='delete_response_dataset'),
+    path('project-management/<int:id>/delete/', views.delete_project_management, name='delete_project_management'),
+    path('implementation/<int:id>/delete/', views.delete_system_implementation, name='delete_system_implementation'),
 ]
 

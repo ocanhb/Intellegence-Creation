@@ -10,7 +10,7 @@ class ProblemFraming(models.Model):
     planned_process = models.TextField()
     expected_output = models.CharField(max_length=255)
     dataset_needed = models.TextField()
-    
+
     def __str__(self):
         return self.problem_name
 
@@ -82,13 +82,15 @@ class History(models.Model):
 
 
 class ToExperience(models.Model):
-    namaProjek = models.TextField()
-    meaningful = models.FileField(upload_to='dokumen/', null=True, blank=True)
-    experience = models.FileField(upload_to='dokumen/', null=True, blank=True)
-    implementasi = models.FileField(upload_to='dokumen/', null=True, blank=True)
-    batasan = models.FileField(upload_to='dokumen/', null=True, blank=True)
-    perencanaan = models.FileField(upload_to='dokumen/', null=True, blank=True)
+    namaProjek = models.CharField(max_length=100)
+    meaningful = models.FileField(upload_to='laporan/')
+    experience = models.FileField(upload_to='laporan/')
+    implementasi = models.FileField(upload_to='laporan/')
+    batasan = models.FileField(upload_to='laporan/')
+    perencanaan = models.FileField(upload_to='laporan/')
 
+    def __str__(self):
+        return self.namaProjek
 
 class DatasetRequest(models.Model):
     nama_model = models.CharField(max_length=100)
@@ -128,7 +130,7 @@ class SystemImplementation(models.Model):
     no = models.IntegerField()
     nama_model = models.CharField(max_length=100, default="default_model")
     status_project = models.CharField(max_length=50)
-    
+
     # Dulu: final_model = models.CharField(max_length=100)
     dokumentasi_model = models.URLField(help_text="Link ke Google Colab")
 

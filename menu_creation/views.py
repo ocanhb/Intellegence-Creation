@@ -5,7 +5,7 @@ import requests
 from django.shortcuts import render
 from django.http import JsonResponse
 from datetime import datetime
-from django.views.decorators.csrf import csrf_exempt 
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from collections import Counter
 from rest_framework.views import APIView
@@ -54,7 +54,7 @@ class ModelEntryListAPIView(APIView):
         entries = ModelEntry.objects.all()
         serializer = ModelEntrySerializer(entries, many=True)
         return Response(serializer.data)
-    
+
 class ToExperienceViewSet(viewsets.ModelViewSet):
     queryset = ToExperience.objects.all()
     serializer_class = ToExperienceSerializer
@@ -250,58 +250,52 @@ from django.shortcuts import render
 from django.http import FileResponse, Http404
 from django.conf import settings
 
+from urllib.parse import urlparse
 
-def extract_path_from_url(full_url):
-    if full_url:
-        parsed = urlparse(full_url)
-        return parsed.path.lstrip('/media/')
-    return None
+def extract_path_from_url(field_value):
+    try:
+        # Jika field adalah FieldFile
+        if hasattr(field_value, 'url'):
+            return field_value.url
+        # Jika string tapi bukan full URL
+        elif isinstance(field_value, str) and not field_value.startswith('http'):
+            return f'/media/{field_value.lstrip("/")}'
+        # Jika sudah URL penuh
+        elif isinstance(field_value, str):
+            return field_value
+    except:
+        pass
+    return ''
+
 
 
 def integrasi_view(request):
-    try:
-        response = requests.get("http://127.0.0.1:8000/api/laporan-integrasi-json/")
-        response.raise_for_status()
-        data = response.json()
-    except Exception as e:
-        print("Gagal ambil data dari 8000:", e)
-        data = {
-            "dataset_requests": [],
-            "project_management": [],
-            "system_implementation": [],
-            "dataset_responses": [],
-            "toexperience": [],
-        }
+    data = {
+        "toexperience": ToExperience.objects.all().order_by('-id'),
+        "dataset_request": DatasetRequest.objects.all().order_by('-id'),
+        "dataset_response": DatasetSent.objects.all().order_by('-id'),
+        "project_models": ProjectManagement.objects.all().order_by('-id'),
+        "final_models": SystemImplementation.objects.all().order_by('-id'),
+    }
 
-    # Nomor urut
-    for key in ['dataset_requests', 'project_management', 'system_implementation', 'dataset_responses', 'toexperience']:
-        for i, d in enumerate(data.get(key, []), 1):
-            d['no'] = i
-
-    # Tambahkan path untuk file download (jika pakai route custom)
     for d in data.get('system_implementation', []):
-        d['laporan_model_path'] = extract_path_from_url(d.get('laporan_model'))
+        d.laporan_model_path = extract_path_from_url(d.laporan_model)
 
-    for d in data.get('dataset_responses', []):
-        d['data_file_path'] = extract_path_from_url(d.get('data_file'))
+    for d in data.get('dataset_response', []):
+        d.data_file_path = extract_path_from_url(d.data_file)
 
-    for d in data.get('project_management', []):
-        d['file_path'] = extract_path_from_url(d.get('file'))
+    for d in data.get('project_models', []):
+        d.file_path = extract_path_from_url(d.file)
 
     for d in data.get('toexperience', []):
-        d['meaningful_path'] = extract_path_from_url(d.get('meaningful'))
-        d['experience_path'] = extract_path_from_url(d.get('experience'))
-        d['implementasi_path'] = extract_path_from_url(d.get('implementasi'))
-        d['batasan_path'] = extract_path_from_url(d.get('batasan'))
-        d['perencanaan_path'] = extract_path_from_url(d.get('perencanaan'))
+        d.meaningful_path = extract_path_from_url(d.meaningful)
+        d.experience_path = extract_path_from_url(d.experience)
+        d.implementasi_path = extract_path_from_url(d.implementasi)
+        d.batasan_path = extract_path_from_url(d.batasan)
+        d.perencanaan_path = extract_path_from_url(d.perencanaan)
 
-    return render(request, 'integrasi.html', {
-        'dataset_request': data.get('dataset_requests', []),
-        'project_models': data.get('project_management', []),
-        'final_models': data.get('system_implementation', []),
-        'dataset_response': data.get('dataset_responses', []),
-        'toexperience': data.get('toexperience', []),
-        'MEDIA_URL_ABS': 'http://localhost:8000/media/'
+    return render(request, 'integrasi.html', data | {
+        'MEDIA_URL_ABS': 'https://ocanhb.pythonanywhere.com/media/'
     })
 
 
@@ -335,7 +329,7 @@ def problem_framing_form(request, pk=None):
             return redirect('problem_framing')
     else:
         form = ProblemFramingForm(instance=instance)
-    
+
     return render(request, 'problem_framing_form.html', {'form': form})
 
 # API untuk mengambil data JSON
@@ -407,7 +401,7 @@ def submit_System_Implementation(request):
                     print("❌ Error koneksi:", str(e))
 
             return redirect('integrasi')
-        
+
         else:
             # ❗ KEMBALIKAN form dgn error
             print("❌ Form tidak valid:", form.errors)
@@ -483,7 +477,7 @@ def submit_Project_Management(request):
 
             try:
                 response = requests.post(
-                    "http://rezasugiarto.pythonanywhere.com/api/project-management/",
+                    "https://nzurulhaqii.pythonanywhere.com/api/project-management/",
                     data=data,
                     timeout=5
                 )
@@ -554,3 +548,90 @@ def api_list_engineering_data(request):
     data = ToExperience.objects.all().order_by('-id')
     serializer = ToExperienceSerializer(data, many=True, context={"request": request})
     return Response(serializer.data)
+
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+from .models import DatasetSent
+from .serializers import DatasetSentSerializer  # INI WAJIB ADA
+import traceback
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])  # <--- INI WAJIB
+def terima_dataset_api(request):
+    try:
+        uploaded_file = request.FILES.get('file')
+        if not uploaded_file:
+            return Response({"success": False, "message": "File CSV tidak ditemukan."}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = request.data
+
+        final_data = {
+            "sender_name": data.get("sender_name", "Anonim"),
+            "nama_model": data.get("nama_model"),
+            "kebutuhan": data.get("kebutuhan"),
+            "dataset_name": data.get("name"),
+            "dataset_description": data.get("description"),
+            "dataset_status": data.get("status"),
+            "data_file": uploaded_file,
+            "status_pilihan": "Sudah Dipilih",
+        }
+
+        serializer = DatasetSentSerializer(data=final_data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            return Response({
+                "success": True,
+                "message": "Dataset berhasil diterima.",
+                "data": DatasetSentSerializer(instance).data
+            }, status=status.HTTP_201_CREATED)
+
+
+        print("ERROR SERIALIZER:", serializer.errors)
+        return Response({
+            "success": False,
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        print(traceback.format_exc())
+        return Response({
+            "success": False,
+            "message": f"Terjadi kesalahan: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import (
+    ToExperience,
+    DatasetRequest,
+    DatasetSent,
+    ProjectManagement,
+    SystemImplementation
+)
+
+def delete_toexperience(request, id):
+    obj = get_object_or_404(ToExperience, id=id)
+    obj.delete()
+    return redirect('integrasi')
+
+def delete_request_dataset(request, id):
+    obj = get_object_or_404(DatasetRequest, id=id)
+    obj.delete()
+    return redirect('integrasi')
+
+def delete_response_dataset(request, id):
+    obj = get_object_or_404(DatasetSent, id=id)
+    obj.delete()
+    return redirect('integrasi')
+
+def delete_project_management(request, id):
+    obj = get_object_or_404(ProjectManagement, id=id)
+    obj.delete()
+    return redirect('integrasi')
+
+def delete_system_implementation(request, id):
+    obj = get_object_or_404(SystemImplementation, id=id)
+    obj.delete()
+    return redirect('integrasi')
